@@ -51,7 +51,13 @@ export default {
 
 		const pathParts = path.split('/');
 		// pathParts[0] is empty because path starts with /
-		const key = pathParts[1];
+		const rawKey = pathParts[1];
+		let key;
+		try {
+			key = decodeURIComponent(rawKey);
+		} catch (e) {
+			return new Response('Malformed key encoding', { status: 400 });
+		}
 
 		if (!key) {
 			return new Response('Invalid path structure', { status: 400 });
@@ -65,31 +71,27 @@ export default {
 
 		try {
 			// Construct the new URL
-			// Remove the /<key> part from the path to get the "rest"
-			// Example: /google/search -> /search
-			// Example: /google -> /
+			// We reconstruct the suffix from the path parts to handle encoding correctly
+			// and to preserve the structure (trailing slashes etc.)
 
-			// We need to be careful to only remove the first occurrence of /key
-			// path is like /key/rest
+			const partsAfterKey = pathParts.slice(2);
+			let suffix = partsAfterKey.join('/');
 
-			let suffix = path.substring(1 + key.length); // Skip first slash and key
-			if (!suffix.startsWith('/') && suffix.length > 0) {
+			// If there are parts after the key (even if empty string for trailing slash),
+			// we prepend a slash.
+			// Examples:
+			// /key -> partsAfterKey=[] -> suffix=""
+			// /key/ -> partsAfterKey=[""] -> suffix="/"
+			// /key/foo -> partsAfterKey=["foo"] -> suffix="/foo"
+			if (partsAfterKey.length > 0) {
 				suffix = '/' + suffix;
 			}
-            if (suffix === '') {
-                suffix = '/';
-            }
 
 			// Prepare base URL (remove trailing slash if present to avoid double slashes)
 			let cleanBaseUrl = targetBaseUrl;
 			if (cleanBaseUrl.endsWith('/')) {
 				cleanBaseUrl = cleanBaseUrl.slice(0, -1);
 			}
-
-			// If suffix is just '/', and we want to respect the targetBaseUrl exactly if it has a path
-			// e.g. target = https://example.com/app
-			// request = /key
-			// result = https://example.com/app/
 
 			const finalUrlString = cleanBaseUrl + suffix;
 			const finalUrl = new URL(finalUrlString);
