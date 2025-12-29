@@ -12,10 +12,10 @@ export default {
 			if (!key) {
 				return new Response(
 					'Usage:\n' +
-					'1. Proxy: https://proxy.unisynkbymergex.workers.dev/<key>/<rest_of_path>\n' +
-					'2. Get KV: GET https://proxy.unisynkbymergex.workers.dev/?key=<key>\n' +
-					'3. Set KV: GET https://proxy.unisynkbymergex.workers.dev/?key=<key>&value=<target_url>\n' +
-					'4. Set KV: POST https://proxy.unisynkbymergex.workers.dev/?key=<key> (body contains target_url)',
+					'1. Proxy: https://<worker_url>/<key>/<rest_of_path>\n' +
+					'2. Get KV: GET https://<worker_url>/?key=<key>\n' +
+					'3. Set KV: GET https://<worker_url>/?key=<key>&value=<target_url>\n' +
+					'4. Set KV: POST https://<worker_url>/?key=<key> (body contains target_url)',
 					{ status: 200 }
 				);
 			}
